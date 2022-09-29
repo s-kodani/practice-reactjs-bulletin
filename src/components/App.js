@@ -1,5 +1,4 @@
-import './App.css';
-import './tw_styles_dist.css';
+import '../css/App.css';
 import Threads from './threads';
 
 function App() {

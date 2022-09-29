@@ -1,5 +1,7 @@
 import axios from "axios";
 import React from "react";
+import Loading from "./loading";
+import { Header } from "semantic-ui-react";
 
 const baseURL = "https://railway-react-bulletin-board.herokuapp.com";
 
@@ -15,15 +17,17 @@ export default function Threads() {
     });
   }, []);
 
-  if (threads === null) return null;
+  if (threads === null) return <Loading />;
 
   const threadItems = threads.map((threadObj) => {
-    return <li><a href>{threadObj.title}</a></li>
+    return <li key={threadObj.id}><a href="">{threadObj.title}</a></li>
   });
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-3xl my-10">スレッド一覧</h1>
+      <div className="my-10">
+        <Header as="h1" inverted>スレッド一覧</Header>
+      </div>
       <ul className="menu bg-slate-100 w-3/4 rounded-box shadow-xl">{threadItems}</ul>
     </div>
   )
