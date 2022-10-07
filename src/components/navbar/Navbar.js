@@ -6,10 +6,10 @@ export default function Navbar() {
   return (
     <div className="navbar">
       <div className="flex-1">
-        <a className="btn btn-ghost normal-case text-xl"><Link to="/">スレッド</Link></a>
+        <Link className="btn btn-ghost normal-case text-xl" to="/">スレッド</Link>
       </div>
       <div className="navbar-end">
-        <a className="btn"><Link to="/thread/new">スレッド作成</Link></a>
+        <Link className="btn" to="/thread/new">スレッド作成</Link>
       </div>
     </div>
   )

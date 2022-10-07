@@ -7,7 +7,7 @@ import Alert, { ALERT_TYPE } from "../../alert";
 const baseURL = API_CONFIG.BASE_URL;
 
 export default function ThreadCreation() {
-  const [text, setText] = React.useState("");
+  const [text, setText] = React.useState('');
   const [createdThread, setCreatedThread] = React.useState(null);
 
   // https://app.swaggerhub.com/apis/INFO_3/BulletinBoardApplication/1.0.0#/thread/post_threads
@@ -18,6 +18,7 @@ export default function ThreadCreation() {
     try {
       const res = await axios.post(`${baseURL}/threads`, data);
       setCreatedThread(res.data);
+      setText('');
     } catch (error) {
       console.log(error)
       const status = error.response ? error.response.status : null;
@@ -74,7 +75,7 @@ export default function ThreadCreation() {
       </div>
       {alert}
       <div className="my-5 w-4/5 max-w-sm">
-        <input type="text" onChange={handleChange} placeholder="作成するスレッド名を記入" className="input input-bordered w-full max-w-sm" />
+        <input type="text" value={text} onChange={handleChange} placeholder="作成するスレッド名を記入" className="input input-bordered w-full max-w-sm" />
       </div>
       <div className="my-5">
         <button className={`btn ${buttonState}`} onClick={handleClick}>スレッドを作成</button>
