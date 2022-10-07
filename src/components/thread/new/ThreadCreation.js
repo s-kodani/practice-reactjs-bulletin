@@ -1,0 +1,84 @@
+import React from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { API_CONFIG } from "../../../common/const";
+import Alert, { ALERT_TYPE } from "../../alert";
+
+const baseURL = API_CONFIG.BASE_URL;
+
+export default function ThreadCreation() {
+  const [text, setText] = React.useState("");
+  const [createdThread, setCreatedThread] = React.useState(null);
+
+  // https://app.swaggerhub.com/apis/INFO_3/BulletinBoardApplication/1.0.0#/thread/post_threads
+  const createThread = async (threadName) => {
+    const data = {
+      title: threadName
+    };
+    try {
+      const res = await axios.post(`${baseURL}/threads`, data);
+      setCreatedThread(res.data);
+    } catch (error) {
+      console.log(error)
+      const status = error.response ? error.response.status : null;
+      switch (status) {
+        case 400:
+        case 500:
+          setCreatedThread({
+            "ErrorCode": error.code
+          });
+          break;
+        default:
+          setCreatedThread({
+            "ErrorCode": error.code
+          });
+          break;
+      }
+    }
+    return;
+  }
+
+  const handleChange = (event) => {
+    setText(event.target.value);
+  }
+
+  const handleClick = () => {
+    createThread(text);
+  }
+
+  const getAlert = () => {
+    if (!createdThread) return null;
+
+    if (createdThread.threadId) {
+      return (
+        <Alert alertType={ALERT_TYPE.SUCCESS}>
+          <span>スレッド「<Link className="link" to={`/thread/${createdThread.threadId}/`} key={createdThread.threadId}>{createdThread.title}</Link>」(ID: {createdThread.threadId})の作成が完了しました！</span>
+        </Alert>
+      );
+    } else {
+      return (
+        <Alert alertType={ALERT_TYPE.ERROR}>
+          <span>スレッドの作成に失敗しました。（{createdThread.ErrorCode}）</span>
+        </Alert>
+      );
+    }
+  }
+
+  const alert = getAlert();
+  const buttonState = text.length > 0 ? 'btn-active' : 'btn-disabled'
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="my-10">
+        <h1 className="text-2xl font-bold">スレッド新規作成</h1>
+      </div>
+      {alert}
+      <div className="my-5 w-4/5 max-w-sm">
+        <input type="text" onChange={handleChange} placeholder="作成するスレッド名を記入" className="input input-bordered w-full max-w-sm" />
+      </div>
+      <div className="my-5">
+        <button className={`btn ${buttonState}`} onClick={handleClick}>スレッドを作成</button>
+      </div>
+    </div>
+  )
+}

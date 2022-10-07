@@ -10,13 +10,12 @@
     "daisyui": "^2.20.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.4.1",
     "react-scripts": "5.0.1",
-    "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^2.1.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "watch:tw": "tailwindcss -i src/css/tw_styles.css -o src/css/tw_styles_dist.css --watch",
+    "watch:tw": "tailwindcss -i src/css/tw_styles.css -o public/tw_styles_dist.css --watch",
     "start": "react-scripts start & npm run watch:tw",
     "build": "react-scripts build",
     "test": "react-scripts test",
