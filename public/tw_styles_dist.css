@@ -2607,14 +2607,6 @@ html {
   margin-top: 2.5rem;
 }
 
-.block {
-  display: block;
-}
-
-.inline-block {
-  display: inline-block;
-}
-
 .flex {
   display: flex;
 }
