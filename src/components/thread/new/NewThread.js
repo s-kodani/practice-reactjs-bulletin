@@ -6,7 +6,7 @@ import Alert, { ALERT_TYPE } from "../../alert";
 
 const baseURL = API_CONFIG.BASE_URL;
 
-export default function ThreadCreation() {
+export default function NewThread() {
   const [text, setText] = React.useState('');
   const [createdThread, setCreatedThread] = React.useState(null);
 
@@ -25,13 +25,20 @@ export default function ThreadCreation() {
       switch (status) {
         case 400:
         case 500:
-          setCreatedThread({
-            "ErrorCode": error.code
-          });
+          const errorData = error.response.data;
+          if (errorData && errorData.ErrorMessageJP) {
+            setCreatedThread({
+              "ErrorCode": errorData.ErrorMessageJP
+            });
+          } else {
+            setCreatedThread({
+              "ErrorCode": `不明なエラー(${status})`
+            });
+          }
           break;
         default:
           setCreatedThread({
-            "ErrorCode": error.code
+            "ErrorCode": "不明なエラー"
           });
           break;
       }

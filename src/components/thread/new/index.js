@@ -1,3 +1,3 @@
-import ThreadCreation from "./ThreadCreation";
+import NewThread from "./NewThread";
 
-export default ThreadCreation;
+export default NewThread;
