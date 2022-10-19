@@ -6,12 +6,15 @@ import Alert, { ALERT_TYPE } from "../../alert";
 
 const baseURL = API_CONFIG.BASE_URL;
 
+type createdThreadType = {ErrorCode: string} | { threadId: string, title: string } | null;
+type errorDataType = {ErrorCode: number, ErrorMessageJP: string, ErrorMessageEN: string} | null;
+
 export default function NewThread() {
   const [text, setText] = React.useState('');
-  const [createdThread, setCreatedThread] = React.useState(null);
+  const [createdThread, setCreatedThread] = React.useState<createdThreadType>(null);
 
-  // https://app.swaggerhub.com/apis/INFO_3/BulletinBoardApplication/1.0.0#/thread/post_threads
-  const createThread = async (threadName) => {
+  // Doc: https://app.swaggerhub.com/apis/INFO_3/BulletinBoardApplication/1.0.0#/thread/post_threads
+  const createThread = async (threadName: string) => {
     const data = {
       title: threadName
     };
@@ -20,33 +23,39 @@ export default function NewThread() {
       setCreatedThread(res.data);
       setText('');
     } catch (error) {
-      console.log(error)
-      const status = error.response ? error.response.status : null;
-      switch (status) {
-        case 400:
-        case 500:
-          const errorData = error.response.data;
-          if (errorData && errorData.ErrorMessageJP) {
+      console.log(error);
+      if (axios.isAxiosError(error)) {
+        const status = error.response ? error.response.status : null;
+        switch (status) {
+          case 400:
+          case 500:
+            const errorData: errorDataType = error.response !== undefined ? error.response.data as errorDataType : null;
+            if (errorData !== null && "ErrorMessageJP" in errorData) {
+              setCreatedThread({
+                "ErrorCode": errorData.ErrorMessageJP
+              });
+            } else {
+              setCreatedThread({
+                "ErrorCode": `不明なエラー(${status})`
+              });
+            }
+            break;
+          default:
             setCreatedThread({
-              "ErrorCode": errorData.ErrorMessageJP
+              "ErrorCode": "不明なエラー"
             });
-          } else {
-            setCreatedThread({
-              "ErrorCode": `不明なエラー(${status})`
-            });
-          }
-          break;
-        default:
-          setCreatedThread({
-            "ErrorCode": "不明なエラー"
-          });
-          break;
+            break;
+        }
+      } else {
+        setCreatedThread({
+          "ErrorCode": "不明なエラー"
+        });
       }
     }
     return;
   }
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setText(event.target.value);
   }
 
@@ -57,7 +66,7 @@ export default function NewThread() {
   const getAlert = () => {
     if (!createdThread) return null;
 
-    if (createdThread.threadId) {
+    if ('threadId' in createdThread) {
       return (
         <Alert alertType={ALERT_TYPE.SUCCESS}>
           <span>スレッド「<Link className="link" to={`/thread/${createdThread.threadId}/`} key={createdThread.threadId}>{createdThread.title}</Link>」(ID: {createdThread.threadId})の作成が完了しました！</span>
