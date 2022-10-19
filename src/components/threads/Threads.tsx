@@ -9,23 +9,34 @@ const baseURL = API_CONFIG.BASE_URL;
 
 export default function Threads() {
   const [threads, setThreads] = React.useState([]);
-
-  const urlParams = "offset=0";
+  const [pageNum, setPageNum] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
 
   React.useEffect(() => {
+    const offset: number = total === 0 ? 0 : total + 1;
+    const urlParams: string = `offset=${offset}`;
     const getThreadsData = async () => {
       const res = await axios.get(`${baseURL}/threads?${urlParams}`);
       setThreads(res.data);
       return;
     }
     getThreadsData();
-  }, []);
+  }, [total]);
 
   if (threads.length === 0) return <Loading />;
 
   const threadItems = threads.map((threadObj: {id: string, title: string}) => {
-    return <li key={threadObj.id}><Link to={`/thread/${threadObj.id}`} key={threadObj.id}>{threadObj.title}</Link></li>
+    const title: string = threadObj.title.length > 0 ? threadObj.title : '(名無しスレッド)';
+    return <li key={threadObj.id}><Link to={`/thread/${threadObj.id}`} key={threadObj.id}>{title}</Link></li>
   });
+
+  const prevButtonState = pageNum > 0 ? 'btn-active' : 'btn-disabled'
+  const nextButtonState = pageNum === 0 || threads.length >= 10 ? 'btn-active' : 'btn-disabled'
+
+  const clickPaginationHandle = (calcNum: number) => {
+    setPageNum(pageNum + calcNum);
+    setTotal(total + threads.length);
+  }
 
   return (
     <div className="flex flex-col items-center">
@@ -35,6 +46,11 @@ export default function Threads() {
       <ul className="menu w-3/4 rounded-box shadow-xl">
         {threadItems}
       </ul>
+      <div className="btn-group my-10">
+        <button className={`btn ${prevButtonState}`} onClick={() => clickPaginationHandle(-1)}>«</button>
+        <button className="btn">Page {pageNum + 1}</button>
+        <button className={`btn ${nextButtonState}`} onClick={() => clickPaginationHandle(1)}>»</button>
+      </div>
     </div>
   )
 }

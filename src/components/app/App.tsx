@@ -5,7 +5,7 @@ import {
   Link
 } from "react-router-dom";
 import Threads from '../threads';
-import NewThread from '../thread/new';
+import NewThread from '../newThread';
 import Thread from '../thread';
 
 function App() {

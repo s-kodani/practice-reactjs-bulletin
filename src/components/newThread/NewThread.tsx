@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { API_CONFIG } from "../../../common/const";
-import Alert, { ALERT_TYPE } from "../../alert";
+import { API_CONFIG } from "../../common/const";
+import Alert, { ALERT_TYPE } from "../alert";
 
 const baseURL = API_CONFIG.BASE_URL;
 
