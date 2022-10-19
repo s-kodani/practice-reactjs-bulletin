@@ -7,6 +7,7 @@ import Alert, { ALERT_TYPE } from "../../alert";
 const baseURL = API_CONFIG.BASE_URL;
 
 type createdThreadType = {ErrorCode: string} | { threadId: string, title: string } | null;
+type errorDataType = {ErrorCode: number, ErrorMessageJP: string, ErrorMessageEN: string} | null;
 
 export default function NewThread() {
   const [text, setText] = React.useState('');
@@ -23,24 +24,33 @@ export default function NewThread() {
       setText('');
     } catch (error) {
       console.log(error);
-      let errorCode: string;
       if (axios.isAxiosError(error)) {
         const status = error.response ? error.response.status : null;
         switch (status) {
           case 400:
           case 500:
-            errorCode = error.code !== undefined ? error.code : 'Unknown Error';
+            const errorData: errorDataType = error.response !== undefined ? error.response.data as errorDataType : null;
+            if (errorData !== null && "ErrorMessageJP" in errorData) {
+              setCreatedThread({
+                "ErrorCode": errorData.ErrorMessageJP
+              });
+            } else {
+              setCreatedThread({
+                "ErrorCode": `不明なエラー(${status})`
+              });
+            }
             break;
           default:
-            errorCode = 'Unknown Error';
+            setCreatedThread({
+              "ErrorCode": "不明なエラー"
+            });
             break;
         }
       } else {
-        errorCode = 'Unknown Error';
+        setCreatedThread({
+          "ErrorCode": "不明なエラー"
+        });
       }
-      setCreatedThread({
-        ErrorCode: errorCode
-      });
     }
     return;
   }
