@@ -11,31 +11,38 @@ export default function Threads() {
   const [threads, setThreads] = React.useState([]);
   const [pageNum, setPageNum] = React.useState(0);
   const [total, setTotal] = React.useState(0);
+  const [loaded, setLoaded] = React.useState(false);
 
   React.useEffect(() => {
     const offset: number = total === 0 ? 0 : total + 1;
     const urlParams: string = `offset=${offset}`;
     const getThreadsData = async () => {
       const res = await axios.get(`${baseURL}/threads?${urlParams}`);
+      setLoaded(true);
       setThreads(res.data);
       return;
     }
     getThreadsData();
   }, [total]);
 
-  if (threads.length === 0) return <Loading />;
+  if (loaded === false) return <Loading />;
 
   const threadItems = threads.map((threadObj: {id: string, title: string}) => {
     const title: string = threadObj.title.length > 0 ? threadObj.title : '(名無しスレッド)';
-    return <li key={threadObj.id}><Link to={`/thread/${threadObj.id}`} key={threadObj.id}>{title}</Link></li>
+    return (
+      <li key={threadObj.id}>
+        <Link to={`/thread/${threadObj.id}`} state={{threadTitle: threadObj.title}}>{title}</Link>
+      </li>
+    )
   });
 
   const prevButtonState = pageNum > 0 ? 'btn-active' : 'btn-disabled'
-  const nextButtonState = pageNum === 0 || threads.length >= 10 ? 'btn-active' : 'btn-disabled'
+  const nextButtonState = threads.length >= API_CONFIG.MAX_FETCH_THREADS ? 'btn-active' : 'btn-disabled'
 
   const clickPaginationHandle = (calcNum: number) => {
     setPageNum(pageNum + calcNum);
-    setTotal(total + threads.length);
+    setTotal(total + (API_CONFIG.MAX_FETCH_THREADS * calcNum));
+    setLoaded(false);
   }
 
   return (
