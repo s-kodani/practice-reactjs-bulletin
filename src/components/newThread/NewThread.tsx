@@ -6,7 +6,7 @@ import Alert, { ALERT_TYPE } from "../alert";
 
 const baseURL = API_CONFIG.BASE_URL;
 
-type createdThreadType = {ErrorCode: string} | { threadId: string, title: string } | null;
+type createdThreadType = {ErrorCode: string} | { id: string, title: string } | null;
 type errorDataType = {ErrorCode: number, ErrorMessageJP: string, ErrorMessageEN: string} | null;
 
 export default function NewThread() {
@@ -66,10 +66,10 @@ export default function NewThread() {
   const getAlert = () => {
     if (!createdThread) return null;
 
-    if ('threadId' in createdThread) {
+    if ('id' in createdThread) {
       return (
         <Alert alertType={ALERT_TYPE.SUCCESS}>
-          <span>スレッド「<Link className="link" to={`/thread/${createdThread.threadId}/`} key={createdThread.threadId}>{createdThread.title}</Link>」(ID: {createdThread.threadId})の作成が完了しました！</span>
+          <span>スレッド「<Link className="link" to={`/thread/${createdThread.id}/`} key={createdThread.id} state={{threadTitle: createdThread.title}}>{createdThread.title}</Link>」(ID: {createdThread.id})の作成が完了しました！</span>
         </Alert>
       );
     } else {
