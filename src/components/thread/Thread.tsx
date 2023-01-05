@@ -3,14 +3,20 @@ import React from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Loading from "../loading";
 import { API_CONFIG } from "../../common/const";
+import Alert, { ALERT_TYPE } from "../alert";
 
 const baseURL = API_CONFIG.BASE_URL;
+
+type createdPostType = {ErrorCode: string} | null;
+type errorDataType = {ErrorCode: number, ErrorMessageJP: string, ErrorMessageEN: string} | null;
 
 export default function Thread() {
   const [posts, setPosts] = React.useState([]);
   const [pageNum, setPageNum] = React.useState(0);
   const [total, setTotal] = React.useState(0);
   const [loaded, setLoaded] = React.useState(false);
+  const [text, setText] = React.useState('');
+  const [createdPost, setCreatedPost] = React.useState<createdPostType>(null);
 
   const location = useLocation();
   const { threadTitle } = location.state;
@@ -29,7 +35,7 @@ export default function Thread() {
       return;
     }
     getThreadsData();
-  }, [total, threadId]);
+  }, [total, threadId, createdPost]);
 
   if (loaded === false) return <Loading />;
 
@@ -56,20 +62,93 @@ export default function Thread() {
     setTotal(total + (API_CONFIG.MUX_FETCH_POSTS * calcNum));
     setLoaded(false);
     setPosts([]);
+    setCreatedPost(null);
   }
+
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setText(event.target.value);
+  }
+
+  const post = async (text: string) => {
+    const data = {
+      post: text
+    }
+    try {
+      const res = await axios.post(`${baseURL}/threads/${threadId}/posts`, data);
+      setCreatedPost(res.data);
+      setText('');
+    } catch (error) {
+      console.log(error);
+      if (axios.isAxiosError(error)) {
+        const status = error.response ? error.response.status : null;
+        switch (status) {
+          case 400:
+          case 500:
+            const errorData: errorDataType = error.response !== undefined ? error.response.data as errorDataType : null;
+            if (errorData !== null && "ErrorMessageJP" in errorData) {
+              setCreatedPost({
+                "ErrorCode": errorData.ErrorMessageJP
+              });
+            } else {
+              setCreatedPost({
+                "ErrorCode": `不明なエラー(${status})`
+              });
+            }
+            break;
+          default:
+            setCreatedPost({
+              "ErrorCode": "不明なエラー"
+            });
+            break;
+        }
+      } else {
+        setCreatedPost({
+          "ErrorCode": "不明なエラー"
+        });
+      }
+    }
+  }
+  const handleClick = () => {
+    post(text);
+
+  }
+  const getAlert = () => {
+    if (!createdPost) return null;
+
+    if ('id' in createdPost) {
+      return (
+        <Alert alertType={ALERT_TYPE.SUCCESS}>
+          <span>投稿が完了しました！</span>
+        </Alert>
+      );
+    } else {
+      return (
+        <Alert alertType={ALERT_TYPE.ERROR}>
+          <span>投稿に失敗しました。（{createdPost.ErrorCode}）</span>
+        </Alert>
+      );
+    }
+  }
+  const alert = getAlert();
+  const buttonState = text.length > 0 ? 'btn-active btn-primary' : 'btn-disabled'
 
   return (
     <div className="flex flex-col items-center">
       <div className="my-10">
         <h1 className="text-2xl font-bold">{threadTitle}</h1>
       </div>
-      <div className="grid grid-cols-4 gap-2 lg:gap-4 w-10/12 lg:w-1/2">
+      {alert}
+      <div className="grid grid-cols-4 gap-2 lg:gap-4 w-10/12 lg:w-1/2 mt-10">
         {postItems}
       </div>
       <div className="btn-group my-10">
         <button className={`btn ${prevButtonState}`} onClick={() => clickPaginationHandle(-1)}>«</button>
         <button className="btn">Page {pageNum + 1}</button>
         <button className={`btn ${nextButtonState}`} onClick={() => clickPaginationHandle(1)}>»</button>
+      </div>
+      <div className="my-10 w-1/2 flex flex-col">
+        <textarea className="textarea textarea-bordered mb-10" placeholder="投稿内容を入力してください。" value={text} onChange={handleChange}></textarea>
+        <button className={`btn ${buttonState}`} onClick={handleClick}>投稿</button>
       </div>
     </div>
   )
